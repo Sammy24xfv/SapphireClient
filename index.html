@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sapphire Client – Minecraft launcher</title>
+  <meta name="description" content="Sapphire Client is a premium Minecraft launcher with one-click performance bundles, Modrinth and CurseForge mods, and no tracking.">
+  <meta property="og:title" content="Sapphire Client">
+  <meta property="og:description" content="The premium Minecraft launcher. Fast, private and effortless.">
+  <meta property="og:image" content="assets/home.webp">
+  <meta name="theme-color" content="#070b18">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <style>
+    @font-face { font-family: "Poppins"; src: url("assets/fonts/Poppins-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Poppins"; src: url("assets/fonts/Poppins-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+    @font-face { font-family: "Poppins"; src: url("assets/fonts/Poppins-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
+    @font-face { font-family: "Poppins"; src: url("assets/fonts/Poppins-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+    @font-face { font-family: "Poppins"; src: url("assets/fonts/Poppins-ExtraBold.ttf") format("truetype"); font-weight: 800; font-display: swap; }
+
+    :root {
+      --bg: #070b18;
+      --bg-2: #0b1124;
+      --panel: #10172d;
+      --panel-2: #141d38;
+      --line: #23305a;
+      --text: #eef2ff;
+      --muted: #9aa6c7;
+      --blue: #2f5bff;
+      --blue-2: #4c7dff;
+      --cyan: #5ec8ff;
+      --glow: rgba(64, 120, 255, .45);
+      --radius: 16px;
+      --wrap: 1160px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; }
+    img { max-width: 100%; display: block; }
+    .wrap { width: min(var(--wrap), 100% - 32px); margin-inline: auto; }
+
+    /* Background glow */
+    .sky {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(900px 500px at 75% -10%, rgba(47, 91, 255, .28), transparent 60%),
+        radial-gradient(700px 500px at 0% 30%, rgba(94, 200, 255, .10), transparent 60%),
+        var(--bg);
+    }
+
+    /* Nav */
+    header.nav {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(7, 11, 24, .72);
+      border-bottom: 1px solid rgba(35, 48, 90, .6);
+    }
+    .nav .wrap { display: flex; align-items: center; gap: 24px; height: 68px; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 800; letter-spacing: .5px; }
+    .brand img { width: 38px; height: 38px; }
+    .brand span { font-size: 18px; }
+    .brand b { color: var(--blue-2); font-weight: 800; }
+    .nav nav { display: flex; gap: 22px; margin-left: auto; }
+    .nav nav a { text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; }
+    .nav nav a:hover { color: var(--text); }
+    .nav .btn { padding: 9px 16px; font-size: 14px; }
+    @media (max-width: 760px) { .nav nav { display: none; } .nav .btn { margin-left: auto; } }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 22px; border-radius: 12px;
+      font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
+      border: 1px solid transparent; transition: transform .15s, box-shadow .15s, background .15s;
+    }
+    .btn svg { width: 20px; height: 20px; flex: none; }
+    .btn-primary {
+      background: var(--blue); color: #fff;
+      border-color: rgba(140, 180, 255, .9);
+      box-shadow: 0 0 24px var(--glow), inset 0 1px 0 rgba(255, 255, 255, .15);
+    }
+    .btn-primary:hover { background: var(--blue-2); transform: translateY(-1px); box-shadow: 0 0 34px var(--glow); }
+    .btn-ghost { background: rgba(20, 29, 56, .7); color: var(--text); border-color: var(--line); }
+    .btn-ghost:hover { border-color: var(--blue-2); }
+    .btn small { display: block; font-weight: 400; font-size: 12px; opacity: .8; line-height: 1.2; }
+    .btn .stack { display: flex; flex-direction: column; text-align: left; line-height: 1.25; }
+
+    /* Hero */
+    .hero { padding: 72px 0 40px; }
+    .hero .wrap { display: grid; grid-template-columns: 1fr 1.15fr; gap: 48px; align-items: center; }
+    .hero-logo { width: 120px; height: 120px; margin-bottom: 12px; filter: drop-shadow(0 0 28px rgba(64, 120, 255, .55)); }
+    .eyebrow {
+      display: inline-block; padding: 5px 12px; border-radius: 999px;
+      background: rgba(47, 91, 255, .14); border: 1px solid rgba(76, 125, 255, .4);
+      color: #b9caff; font-size: 13px; font-weight: 500;
+    }
+    h1 { font-size: clamp(40px, 6vw, 64px); line-height: 1.05; margin: 16px 0 14px; font-weight: 800; letter-spacing: -1px; }
+    h1 .accent { background: linear-gradient(90deg, var(--blue-2), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lead { color: var(--muted); font-size: 18px; max-width: 520px; margin: 0 0 28px; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .cta-note { margin-top: 14px; color: var(--muted); font-size: 13px; }
+    .cta-note a { color: #b9caff; }
+    .shot-frame {
+      position: relative; border-radius: 18px; overflow: hidden;
+      border: 1px solid rgba(76, 125, 255, .45);
+      box-shadow: 0 0 60px rgba(47, 91, 255, .35), 0 30px 60px rgba(0, 0, 0, .5);
+      transform: perspective(1400px) rotateY(-6deg) rotateX(2deg);
+    }
+    @media (max-width: 900px) {
+      .hero .wrap { grid-template-columns: 1fr; }
+      .shot-frame { transform: none; }
+    }
+
+    /* Sections */
+    section { padding: 72px 0; }
+    .section-head { text-align: center; max-width: 640px; margin: 0 auto 40px; }
+    h2 { font-size: clamp(28px, 4vw, 40px); margin: 10px 0; line-height: 1.15; letter-spacing: -.5px; }
+    .section-head p { color: var(--muted); margin: 0; }
+
+    /* Features */
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature {
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      border: 1px solid var(--line); border-radius: var(--radius); padding: 24px;
+    }
+    .feature .ico {
+      width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
+      background: rgba(47, 91, 255, .15); border: 1px solid rgba(76, 125, 255, .35); color: #9db8ff;
+      margin-bottom: 14px;
+    }
+    .feature .ico svg { width: 22px; height: 22px; }
+    .feature h3 { margin: 0 0 6px; font-size: 18px; }
+    .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+    @media (max-width: 900px) { .features { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .features { grid-template-columns: 1fr; } }
+
+    /* Gallery */
+    .tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 5px; margin: 0 auto 24px;
+      width: fit-content; max-width: 100%; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+    .tabs button {
+      font: inherit; font-size: 14px; font-weight: 500; color: var(--text); cursor: pointer;
+      background: transparent; border: 1px solid transparent; border-radius: 10px; padding: 8px 14px;
+    }
+    .tabs button:hover { background: var(--panel-2); }
+    .tabs button[aria-selected="true"] { background: var(--blue); border-color: rgba(140, 180, 255, .9); box-shadow: 0 0 18px var(--glow); }
+    .gallery-frame { border-radius: 18px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 70px rgba(0, 0, 0, .45); background: var(--panel); }
+    .gallery-frame img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; object-position: top; }
+    .gallery-caption { text-align: center; color: var(--muted); margin-top: 14px; font-size: 15px; }
+
+    /* Downloads */
+    .downloads { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .platform {
+      position: relative; background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .platform.yours { border-color: rgba(120, 170, 255, .9); box-shadow: 0 0 34px rgba(47, 91, 255, .3); }
+    .platform .badge { position: absolute; top: 16px; right: 16px; font-size: 12px; padding: 3px 10px; border-radius: 999px; background: var(--blue); }
+    .platform h3 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 20px; }
+    .platform h3 svg { width: 26px; height: 26px; }
+    .platform .files { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+    .platform .btn { justify-content: space-between; width: 100%; }
+    .platform .hint { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+    .release-line { text-align: center; color: var(--muted); margin-top: 22px; font-size: 14px; }
+    .release-line a { color: #b9caff; }
+    @media (max-width: 900px) { .downloads { grid-template-columns: 1fr; } }
+
+    /* Install help + FAQ */
+    details {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+      padding: 16px 20px; margin-bottom: 12px;
+    }
+    summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; color: var(--blue-2); font-size: 20px; line-height: 1; }
+    details[open] summary::after { content: "–"; }
+    details p, details li { color: var(--muted); }
+    code { background: #0a1020; border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; font-size: 13px; color: #cdd8ff; word-break: break-all; }
+    .faq { max-width: 820px; margin: 0 auto; }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--line); padding: 36px 0 48px; color: var(--muted); font-size: 14px; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; align-items: flex-start; }
+    footer .links { display: flex; gap: 18px; flex-wrap: wrap; }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+    .fine { flex-basis: 100%; font-size: 12.5px; color: #6f7ba0; }
+  </style>
+</head>
+<body>
+  <div class="sky"></div>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="Sapphire Client home">
+        <img src="assets/logo-glow.png" alt="">
+        <span>SAPPHIRE <b>CLIENT</b></span>
+      </a>
+      <nav aria-label="Main">
+        <a href="#features">Features</a>
+        <a href="#screenshots">Screenshots</a>
+        <a href="#download">Download</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <a class="btn btn-primary" href="#download">Download</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <img class="hero-logo" src="assets/logo-glow.png" alt="Sapphire Client logo">
+          <span class="eyebrow">Now available · <span data-version>Latest release</span></span>
+          <h1>Minecraft,<br><span class="accent">polished.</span></h1>
+          <p class="lead">Sapphire Client is a premium Minecraft launcher, built for speed and privacy. Pick a version, get a tuned performance setup in one click, and add mods from Modrinth and CurseForge.</p>
+          <div class="cta">
+            <a class="btn btn-primary" id="hero-download" href="https://github.com/Sammy24xfv/SapphireClient/releases/latest">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
+              <span class="stack"><span id="hero-download-label">Download Sapphire Client</span><small id="hero-download-sub">For Windows, macOS and Linux</small></span>
+            </a>
+            <a class="btn btn-ghost" href="#screenshots">See it in action</a>
+          </div>
+          <p class="cta-note">Windows · macOS · Linux — <a href="#download">all downloads</a></p>
+        </div>
+        <div class="shot-frame">
+          <img src="assets/home.webp" alt="The Sapphire Client home screen with the 26.3 Fabric version selected" width="1200" height="800">
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Why Sapphire</span>
+          <h2>Everything you need, nothing you don't</h2>
+          <p>Crafted for players who expect Minecraft to run flawlessly.</p>
+        </div>
+        <div class="features">
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></div>
+            <h3>One-click performance</h3>
+            <p>Every Sapphire version comes with a tuned bundle: Sodium, Lithium, FerriteCore, ImmediatelyFast, EntityCulling and Dynamic FPS.</p>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 20.5 7.25v9.5L12 21.5l-8.5-4.75v-9.5L12 2.5z"/><path d="M3.5 7.25 12 12l8.5-4.75M12 12v9.5"/></svg></div>
+            <h3>Ready-made versions</h3>
+            <p>From 1.21.1 to 26.3 on Fabric. Pick one and play — Java is downloaded and set up for you.</p>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
+            <h3>Modrinth &amp; CurseForge</h3>
+            <p>Browse and install mods, resource packs, shaders, data packs and modpacks from both sites in one place.</p>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
+            <h3>Private by design</h3>
+            <p>No accounts of ours, no analytics, no ads, no tracking. Your data stays on your computer.</p>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></div>
+            <h3>Signed auto-updates</h3>
+            <p>New versions install themselves, and every update is signed so only real Sapphire releases get in.</p>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17 10 11l4 4 6-8"/><path d="M14 7h6v6"/></svg></div>
+            <h3>Native speed</h3>
+            <p>A true native app, not a web page in disguise. It opens in an instant and stays light on memory while you play.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screenshots -->
+    <section id="screenshots">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Screenshots</span>
+          <h2>Take a look around</h2>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Screenshots">
+          <button role="tab" aria-selected="true" data-shot="home">Home</button>
+          <button role="tab" aria-selected="false" data-shot="versions">Versions</button>
+          <button role="tab" aria-selected="false" data-shot="modrinth">Browse Modrinth</button>
+          <button role="tab" aria-selected="false" data-shot="curseforge">Browse CurseForge</button>
+          <button role="tab" aria-selected="false" data-shot="create">New instance</button>
+          <button role="tab" aria-selected="false" data-shot="settings">Settings</button>
+        </div>
+        <div class="gallery-frame">
+          <img id="shot" src="assets/home.webp" alt="" width="1200" height="800">
+        </div>
+        <p class="gallery-caption" id="shot-caption"></p>
+      </div>
+    </section>
+
+    <!-- Downloads -->
+    <section id="download">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Download</span>
+          <h2>Get Sapphire Client</h2>
+          <p>Available for Windows, macOS and Linux. Requires Minecraft: Java Edition.</p>
+        </div>
+        <div class="downloads">
+          <div class="platform" data-os="windows">
+            <h3><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10.5 4.4v7.1H3zM11.5 4.3 21 3v8.5h-9.5zM3 12.5h7.5v7.1L3 18.5zM11.5 12.5H21V21l-9.5-1.3z"/></svg>Windows</h3>
+            <div class="files">
+              <a class="btn btn-primary" data-asset="windows" href="https://github.com/Sammy24xfv/SapphireClient/releases/latest"><span class="stack">Installer<small>Windows 10 / 11 · 64-bit</small></span><span data-size></span></a>
+            </div>
+          </div>
+          <div class="platform" data-os="mac">
+            <h3><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.8 1.2 1.8 2.6 3.1 2.6 1.3-.1 1.7-.8 3.3-.8 1.5 0 1.9.8 3.3.8 1.4 0 2.2-1.3 3-2.5.9-1.4 1.3-2.7 1.3-2.8 0 0-2.7-1-2.7-4.2zM13.9 4.8c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>macOS</h3>
+            <div class="files">
+              <a class="btn btn-primary" data-asset="mac-arm" href="https://github.com/Sammy24xfv/SapphireClient/releases/latest"><span class="stack">Apple Silicon<small>M1, M2, M3, M4 · .dmg</small></span><span data-size></span></a>
+              <a class="btn btn-ghost" data-asset="mac-intel" href="https://github.com/Sammy24xfv/SapphireClient/releases/latest"><span class="stack">Intel<small>Older Macs · .dmg</small></span><span data-size></span></a>
+            </div>
+          </div>
+          <div class="platform" data-os="linux">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="m7 9 3 2.5L7 14M12 14h5"/></svg>Linux</h3>
+            <div class="files">
+              <a class="btn btn-primary" data-asset="appimage" href="https://github.com/Sammy24xfv/SapphireClient/releases/latest"><span class="stack">AppImage<small>Works on most distros</small></span><span data-size></span></a>
+              <a class="btn btn-ghost" data-asset="deb" href="https://github.com/Sammy24xfv/SapphireClient/releases/latest"><span class="stack">.deb<small>Debian, Ubuntu, Mint</small></span><span data-size></span></a>
+              <a class="btn btn-ghost" data-asset="rpm" href="https://github.com/Sammy24xfv/SapphireClient/releases/latest"><span class="stack">.rpm<small>Fedora, openSUSE</small></span><span data-size></span></a>
+              <a class="btn btn-ghost" data-asset="flatpak" href="https://github.com/Sammy24xfv/SapphireClient/releases/latest"><span class="stack">Flatpak<small>Sandboxed bundle</small></span><span data-size></span></a>
+            </div>
+          </div>
+        </div>
+        <p class="release-line" id="release-line">Every download is signed and checked for updates automatically.</p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <div class="wrap faq">
+        <div class="section-head">
+          <span class="eyebrow">Help</span>
+          <h2>Installing &amp; FAQ</h2>
+        </div>
+        <details>
+          <summary>Windows says "Windows protected your PC"</summary>
+          <p>The installer isn't code-signed yet, so Windows SmartScreen warns about it the first time. Click <b>More info</b>, then <b>Run anyway</b>. Updates after that install on their own.</p>
+        </details>
+        <details>
+          <summary>macOS won't open the app</summary>
+          <p>Open the <code>.dmg</code> and drag Sapphire Client into <b>Applications</b>. The first time, right-click the app and choose <b>Open</b>. If macOS says the app "is damaged", run this in Terminal once:</p>
+          <p><code>xattr -cr "/Applications/Sapphire Client.app"</code></p>
+        </details>
+        <details>
+          <summary>How do I run the Linux AppImage?</summary>
+          <p>Make it runnable, then start it: <code>chmod +x SapphireClient_*.AppImage</code> and <code>./SapphireClient_*.AppImage</code>. Prefer a package? Use the <code>.deb</code>, <code>.rpm</code> or Flatpak instead.</p>
+        </details>
+        <details>
+          <summary>Do I need to own Minecraft?</summary>
+          <p>Yes. Sign in with the Microsoft account that owns Minecraft: Java Edition. Sapphire Client downloads and launches the game, but doesn't include or sell it.</p>
+        </details>
+        <details>
+          <summary>What data do you collect?</summary>
+          <p>Nothing. We don't collect anything: no accounts, analytics or tracking. The launcher only talks to the services it needs, like Microsoft for sign-in and Modrinth for mods. See the <a href="https://github.com/Sammy24xfv/SapphireClient/blob/main/PRIVACY.md">Privacy Policy</a> for the full list.</p>
+        </details>
+        <details>
+          <summary>Can I bring my instances from another launcher?</summary>
+          <p>Yes. Choose <b>New instance → Import</b> to bring instances over from launchers like Prism or the Modrinth App, or open a file someone exported from Sapphire Client.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <a class="brand" href="#top"><img src="assets/logo-glow.png" alt=""><span>SAPPHIRE <b>CLIENT</b></span></a>
+      <div class="links">
+        <a href="#download">Download</a>
+        <a href="#faq">Help</a>
+        <a href="https://github.com/Sammy24xfv/SapphireClient/blob/main/TERMS.md">Terms</a>
+        <a href="https://github.com/Sammy24xfv/SapphireClient/blob/main/PRIVACY.md">Privacy</a>
+      </div>
+      <p class="fine">© 2026 Sapphire Client. Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft. Minecraft is a trademark of Mojang Synergies AB.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Screenshot tabs
+    const shots = {
+      home: ["assets/home.webp", "Home: pick a version and launch in one click."],
+      versions: ["assets/versions.webp", "Versions: every Sapphire version and your own instances."],
+      modrinth: ["assets/browse-modrinth.jpg", "Browse thousands of mods from Modrinth."],
+      curseforge: ["assets/browse-curseforge.jpg", "…or switch to CurseForge with one click."],
+      create: ["assets/new-instance.jpg", "Start from a Sapphire version, from scratch, a modpack or an import."],
+      settings: ["assets/settings.jpg", "Settings for the launcher, Java, appearance and more."],
+    };
+    const shot = document.getElementById("shot");
+    const caption = document.getElementById("shot-caption");
+    function showShot(key) {
+      const [src, text] = shots[key];
+      shot.src = src;
+      shot.alt = text;
+      caption.textContent = text;
+      document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.shot === key)));
+    }
+    document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => showShot(b.dataset.shot)));
+    showShot("home");
+
+    // Which download suits this visitor
+    function detectOs() {
+      const p = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+      const ua = navigator.userAgent || "";
+      if (/win/i.test(p) || /windows/i.test(ua)) return "windows";
+      if (/mac/i.test(p) || /mac os x/i.test(ua)) return "mac";
+      if (/linux|x11/i.test(p) || /linux/i.test(ua)) return "linux";
+      return null;
+    }
+    const os = detectOs();
+    if (os) {
+      const card = document.querySelector(`.platform[data-os="${os}"]`);
+      if (card) {
+        card.classList.add("yours");
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = "Your system";
+        card.appendChild(badge);
+      }
+    }
+
+    // Latest release from GitHub, so the buttons always point at the newest files
+    const patterns = {
+      "windows": /_windows_x86_64\.exe$/i,
+      "mac-arm": /aarch64\.dmg$/i,
+      "mac-intel": /x64\.dmg$/i,
+      "appimage": /_linux_x86_64\.AppImage$/i,
+      "deb": /_linux_x86_64\.deb$/i,
+      "rpm": /_linux_x86_64\.rpm$/i,
+      "flatpak": /_linux_x86_64\.flatpak$/i,
+    };
+    const mb = (bytes) => `${Math.round(bytes / 1048576)} MB`;
+    fetch("https://api.github.com/repos/Sammy24xfv/SapphireClient/releases/latest", { headers: { Accept: "application/vnd.github+json" } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((release) => {
+        const version = String(release.tag_name || "").replace(/^sapphire-/, "");
+        document.querySelectorAll("[data-version]").forEach((el) => (el.textContent = `v${version}`));
+        const assets = release.assets || [];
+        const found = {};
+        for (const [key, re] of Object.entries(patterns)) {
+          const asset = assets.find((a) => re.test(a.name));
+          if (!asset) continue;
+          found[key] = asset;
+          document.querySelectorAll(`[data-asset="${key}"]`).forEach((a) => {
+            a.href = asset.browser_download_url;
+            const size = a.querySelector("[data-size]");
+            if (size) size.textContent = mb(asset.size);
+          });
+        }
+        const when = release.published_at ? new Date(release.published_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) : "";
+        document.getElementById("release-line").innerHTML =
+          `Version <b>${version}</b>${when ? `, released ${when}` : ""}. Signed and ready to install.`;
+
+        const heroKey = { windows: "windows", mac: "mac-arm", linux: "appimage" }[os];
+        const label = { windows: "Download for Windows", mac: "Download for macOS", linux: "Download for Linux" }[os];
+        if (heroKey && found[heroKey]) {
+          document.getElementById("hero-download").href = found[heroKey].browser_download_url;
+          document.getElementById("hero-download-label").textContent = label;
+          document.getElementById("hero-download-sub").textContent = `Version ${version} · ${mb(found[heroKey].size)}`;
+        }
+      })
+      .catch(() => {
+        // GitHub unreachable or rate-limited: every button already links to the releases page
+      });
+  </script>
+</body>
+</html>

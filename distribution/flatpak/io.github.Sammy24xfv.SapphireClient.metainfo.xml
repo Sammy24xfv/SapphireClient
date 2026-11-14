@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.Sammy24xfv.SapphireClient</id>
+  <name>Sapphire Client</name>
+  <summary>The premium Minecraft launcher</summary>
+  <developer id="io.github.Sammy24xfv">
+    <name>Sammy24xfv</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <description>
+    <p>Sapphire Client is a premium Minecraft launcher, built for speed and privacy.</p>
+  </description>
+  <launchable type="desktop-id">io.github.Sammy24xfv.SapphireClient.desktop</launchable>
+  <url type="homepage">https://sammy24xfv.github.io/SapphireClient/</url>
+  <url type="bugtracker">https://github.com/Sammy24xfv/SapphireClient/issues</url>
+  <content_rating type="oars-1.1"/>
+  <provides>
+    <binary>sapphire_client</binary>
+  </provides>
+</component>

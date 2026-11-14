@@ -1,0 +1,50 @@
+id: io.github.Sammy24xfv.SapphireClient
+runtime: org.gnome.Platform
+runtime-version: '51'
+sdk: org.gnome.Sdk
+command: sapphire_client
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --device=dri
+  - --filesystem=xdg-download:ro
+  - --filesystem=xdg-run/discord-ipc-0
+  - --filesystem=xdg-run/app/com.discordapp.Discord:create
+
+modules:
+  - name: xrandr
+    buildsystem: meson
+    sources:
+      - type: archive
+        url: https://xorg.freedesktop.org/archive/individual/app/xrandr-1.5.4.tar.xz
+        sha256: 2cafccb2aaf2491a4068676117a0d4f90ab307724b96fffc54cd1da953779400
+    cleanup:
+      - /share/man
+
+  - name: sapphire-client
+    buildsystem: simple
+    only-arches:
+      - x86_64
+    sources:
+      - type: file
+        url: https://github.com/Sammy24xfv/SapphireClient/releases/download/sapphire-2.10.2/SapphireClient_2.10.2_linux_x86_64.deb
+        sha256: 8ac0ea645b78bcd2a9e13cb14e4ab22cc732ddf33b7bea88375cfcba4114d536
+        dest-filename: sapphire-client.deb
+      - type: file
+        path: io.github.Sammy24xfv.SapphireClient.metainfo.xml
+    build-commands:
+      - ar x sapphire-client.deb
+      - tar xf data.tar.*
+      - install -Dm755 usr/bin/sapphire_client -t /app/bin
+      - |
+        for dir in usr/share/icons/hicolor/*/; do
+          size=$(basename "$dir" | cut -d@ -f1)
+          install -Dm644 "$dir/apps/sapphire_client.png" "/app/share/icons/hicolor/$size/apps/$FLATPAK_ID.png"
+        done
+      - sed -e "s|^Exec=.*|Exec=sapphire_client %u|" -e "s|^Icon=.*|Icon=$FLATPAK_ID|" usr/share/applications/sapphire_client.desktop > $FLATPAK_ID.desktop
+      - echo "MimeType=x-scheme-handler/sapphireclient;" >> $FLATPAK_ID.desktop
+      - install -Dm644 $FLATPAK_ID.desktop -t /app/share/applications
+      - install -Dm644 $FLATPAK_ID.metainfo.xml -t /app/share/metainfo
